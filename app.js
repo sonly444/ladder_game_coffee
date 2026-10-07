@@ -18,6 +18,7 @@
   const PATH_SPEED = 0.9; // px/ms
   const PAD = 6;
 
+  const colorOf = (start) => COLORS[start % COLORS.length];
   const $ = (id) => document.getElementById(id);
   const els = {
     setup: $('setup'), form: $('setup-form'), count: $('player-count'), nameList: $('name-list'),
@@ -34,7 +35,7 @@
 
   let input = null;  // 마지막으로 시작한 입력값 (다시 하기용)
   let game = null;
-  let geo = null;    // { width, height, colX(i), rowY(r) }
+  let geo = null;    // { width, height, colX(i), rowY(r), paths: [{ pts, len }] }
   let view = null;   // { ladder: 0~1, done, current, t }
   let running = false;
   let skipping = false;
@@ -55,6 +56,14 @@
       inp.maxLength = G.MAX_NAME_LENGTH;
       inp.placeholder = i === 0 ? '예: 홍길동' : `${i + 1}번 이름`;
       inp.value = prev[i] || '';
+      inp.enterKeyHint = i === count - 1 ? 'done' : 'next';
+      inp.addEventListener('keydown', (e) => {
+        const next = els.nameList.querySelectorAll('input')[i + 1];
+        if (e.key === 'Enter' && !e.isComposing && next) {
+          e.preventDefault();
+          next.focus();
+        }
+      });
       row.appendChild(inp);
       els.nameList.appendChild(row);
     }
@@ -111,12 +120,12 @@
       colX: (i) => ((i + 0.5) * width) / count,
       rowY: (r) => PAD + ((r + 1) * span) / (game.ladder.rows + 1),
     };
+    geo.paths = game.results.map((r) => {
+      const pts = r.points.map((p) => ({ x: geo.colX(p.col), y: geo.rowY(p.row) }));
+      return { pts, len: pathLength(pts) };
+    });
     [...els.topLabels.children].forEach((el, i) => { el.style.left = geo.colX(i) + 'px'; });
     [...els.bottomLabels.children].forEach((el, i) => { el.style.left = geo.colX(i) + 'px'; });
-  }
-
-  function pathPixels(result) {
-    return result.points.map((p) => ({ x: geo.colX(p.col), y: geo.rowY(p.row) }));
   }
 
   function pathLength(pts) {
@@ -126,9 +135,9 @@
   }
 
   function drawPath(result, t) {
-    const pts = pathPixels(result);
-    let remain = pathLength(pts) * t;
-    ctx.strokeStyle = COLORS[result.start % COLORS.length];
+    const { pts, len } = geo.paths[result.start];
+    let remain = len * t;
+    ctx.strokeStyle = colorOf(result.start);
     ctx.lineWidth = 6;
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pts[0].y);
@@ -207,7 +216,7 @@
       tag.className = 'tag';
       tag.textContent = r.name;
       tag.title = r.name;
-      tag.style.background = COLORS[r.start % COLORS.length];
+      tag.style.background = colorOf(r.start);
       els.topLabels.appendChild(tag);
     });
     game.prizes.forEach(() => {
@@ -222,7 +231,7 @@
     const tag = els.bottomLabels.children[result.end];
     tag.textContent = result.win ? '☕ 당첨' : '통과 😎';
     tag.classList.add('revealed', result.win ? 'win' : 'pass', 'hit');
-    tag.style.setProperty('--hit-color', COLORS[result.start % COLORS.length]);
+    tag.style.setProperty('--hit-color', colorOf(result.start));
   }
 
   function setButtons(phase) {
@@ -259,7 +268,7 @@
     for (const result of game.results) {
       tops[result.start].classList.add('active');
       view.current = result.start;
-      const dur = Math.min(2200, Math.max(900, pathLength(pathPixels(result)) / PATH_SPEED));
+      const dur = Math.min(2200, Math.max(900, geo.paths[result.start].len / PATH_SPEED));
       await animate(dur, (t) => { view.t = t; draw(); });
       if (my !== round) return;
       view.done = result.start + 1;
@@ -324,6 +333,7 @@
   }
 
   // ---------- 이벤트 ----------
+  els.form.addEventListener('input', () => showError(null));
   els.count.addEventListener('input', renderNameInputs);
   els.complexity.addEventListener('input', updateComplexityLabel);
   els.winners.addEventListener('change', () => updateWinnerLimit(els.nameList.children.length));
