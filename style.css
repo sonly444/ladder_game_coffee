@@ -1,0 +1,210 @@
+:root {
+  --bg: #fbf6ef;
+  --card: #ffffff;
+  --ink: #3b2a20;
+  --muted: #8a7566;
+  --coffee: #6f4e37;
+  --accent: #e8590c;
+  --line: #e6d8c8;
+  --win: #e03131;
+  --pass: #2f9e44;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.top { text-align: center; padding: 28px 16px 8px; }
+.top h1 { margin: 0; font-size: 1.9rem; }
+.sub { margin: 6px 0 0; color: var(--muted); }
+
+main { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(111, 78, 55, 0.08);
+}
+
+.field { margin-bottom: 18px; }
+.field > label, .field > .label { display: block; font-weight: 700; margin-bottom: 8px; }
+.field small { color: var(--muted); font-weight: 400; }
+
+input[type="number"], input[type="text"] {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: 120px;
+}
+input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.name-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+.name-item { display: flex; align-items: center; gap: 6px; }
+.name-item span { min-width: 34px; color: var(--muted); font-weight: 700; }
+.name-item input { width: 100%; }
+
+.range-row { display: flex; align-items: center; gap: 12px; }
+.range-row input { flex: 1; max-width: 320px; accent-color: var(--coffee); }
+.range-row output { min-width: 90px; font-weight: 700; color: var(--coffee); }
+
+.error { color: var(--win); font-weight: 700; }
+
+.btn {
+  font: inherit;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.btn:hover { background: #f6eee5; }
+.btn.primary { background: var(--coffee); color: #fff; border-color: var(--coffee); }
+.btn.primary:hover { background: #5b3f2c; }
+.btn.ghost { background: transparent; }
+.btn.big { width: 100%; padding: 14px; font-size: 1.1rem; font-weight: 700; }
+.btn:disabled { opacity: .5; cursor: default; }
+
+/* 사다리 보드 */
+.board-scroll { overflow-x: auto; }
+.board { position: relative; margin: 0 auto; }
+.labels { position: relative; height: 44px; }
+.labels .tag {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  max-width: 88px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: .9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #fff;
+  border: 0;
+  font-family: inherit;
+}
+.top-labels .tag.active { animation: pulse .6s ease-in-out infinite alternate; }
+.bottom-labels .tag { background: #cfc3b6; color: #fff; perspective: 400px; }
+.bottom-labels .tag.revealed { animation: flip .45s ease-out; }
+.bottom-labels .tag.win { background: var(--win); }
+.bottom-labels .tag.pass { background: var(--pass); }
+.bottom-labels .tag.hit { box-shadow: 0 0 0 3px var(--hit-color, #000); }
+canvas { display: block; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+
+.result-list {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+}
+.result-list li {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f4fbf5;
+  border-left: 6px solid var(--pass);
+}
+.result-list li.win { background: #fff1f1; border-left-color: var(--win); font-weight: 700; }
+
+@keyframes pulse { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.12); } }
+@keyframes flip {
+  0% { transform: translateX(-50%) rotateX(90deg); }
+  100% { transform: translateX(-50%) rotateX(0); }
+}
+
+/* ===== 킹 받쥬? 놀리기 화면 ===== */
+.tease {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 18, 10, .72);
+  overflow: hidden;
+  animation: fadein .3s ease-out;
+}
+.tease[hidden] { display: none; }
+.tease-rain { position: absolute; inset: 0; pointer-events: none; }
+.tease-rain span {
+  position: absolute;
+  top: -60px;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffd43b;
+  animation: fall linear infinite;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .3);
+}
+.tease-box {
+  position: relative;
+  text-align: center;
+  background: #fff;
+  border-radius: 24px;
+  padding: 28px 32px 24px;
+  width: min(92vw, 460px);
+  animation: popin .5s cubic-bezier(.2, 1.6, .4, 1);
+}
+.tease-face { font-size: 4.5rem; line-height: 1; animation: wobble .9s ease-in-out infinite; }
+.tease-title {
+  margin: 8px 0 0;
+  font-size: 3.2rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #e03131, #f08c00, #e8590c, #d6336c, #e03131);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shake .35s ease-in-out infinite, rainbow 2s linear infinite;
+}
+.tease-sub { margin: 6px 0 12px; color: var(--muted); }
+.tease-names { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.tease-names li {
+  background: var(--win);
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.3rem;
+  border-radius: 999px;
+  padding: 6px 16px;
+  animation: bounce .7s ease-in-out infinite alternate;
+}
+.tease-names li::after { content: " 🫵"; }
+.tease-taunt { min-height: 1.5em; font-weight: 700; color: var(--coffee); margin: 0 0 16px; }
+
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popin { from { transform: scale(.3) rotate(-12deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  25% { transform: translateX(-4px) rotate(-3deg); }
+  75% { transform: translateX(4px) rotate(3deg); }
+}
+@keyframes rainbow { to { background-position: 200% 0; } }
+@keyframes wobble {
+  0%, 100% { transform: rotate(-12deg) scale(1); }
+  50% { transform: rotate(12deg) scale(1.15); }
+}
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+@keyframes fall {
+  from { transform: translateY(0) rotate(0); }
+  to { transform: translateY(115vh) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

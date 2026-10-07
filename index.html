@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>☕ ladder_game_coffee – 커피 내기 사다리 타기</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>☕ 커피 내기 사다리 타기</h1>
+    <p class="sub">ladder_game_coffee · 오늘 커피는 누가 쏠까?</p>
+  </header>
+
+  <main>
+    <!-- 1단계: 입력 -->
+    <section id="setup" class="card">
+      <form id="setup-form" novalidate>
+        <div class="field">
+          <label for="player-count">① 참여 인원 <small>(3~10명)</small></label>
+          <input id="player-count" type="number" min="3" max="10" step="1" value="4" inputmode="numeric">
+        </div>
+
+        <div class="field">
+          <span class="label">② 참여자 이름</span>
+          <div id="name-list" class="name-list"></div>
+        </div>
+
+        <div class="field">
+          <label for="complexity">③ 사다리 복잡도 <small>(1~5)</small></label>
+          <div class="range-row">
+            <input id="complexity" type="range" min="1" max="5" step="1" value="3">
+            <output id="complexity-label" for="complexity">3 · 보통</output>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="winner-count">④ 당첨 인원 <small id="winner-hint">(2~3명)</small></label>
+          <input id="winner-count" type="number" min="2" max="3" step="1" value="2" inputmode="numeric">
+        </div>
+
+        <p id="error" class="error" role="alert" hidden></p>
+        <button type="submit" class="btn primary big">🪜 사다리 만들기</button>
+      </form>
+    </section>
+
+    <!-- 2단계: 게임 -->
+    <section id="game" class="card" hidden>
+      <div class="board-scroll">
+        <div id="board" class="board">
+          <div id="top-labels" class="labels top-labels"></div>
+          <canvas id="ladder-canvas"></canvas>
+          <div id="bottom-labels" class="labels bottom-labels"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="start-btn" class="btn primary">▶ 사다리 타기 시작</button>
+        <button id="skip-btn" class="btn" hidden>⏩ 결과 바로 보기</button>
+        <button id="again-btn" class="btn" hidden>🔁 같은 멤버로 다시</button>
+        <button id="reset-btn" class="btn ghost">✏️ 처음으로</button>
+      </div>
+      <ul id="result-list" class="result-list" hidden></ul>
+    </section>
+  </main>
+
+  <!-- 당첨 놀리기 화면 -->
+  <div id="tease" class="tease" hidden role="dialog" aria-modal="true" aria-labelledby="tease-title">
+    <div class="tease-rain" aria-hidden="true"></div>
+    <div class="tease-box">
+      <div class="tease-face" aria-hidden="true">😜</div>
+      <h2 id="tease-title" class="tease-title">킹 받쥬?</h2>
+      <p class="tease-sub">오늘의 커피 스폰서 ☕</p>
+      <ul id="tease-names" class="tease-names"></ul>
+      <p class="tease-taunt" id="tease-taunt"></p>
+      <button id="tease-close" class="btn primary">인정… 커피 쏩니다 ☕</button>
+    </div>
+  </div>
+
+  <script src="ladder.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
