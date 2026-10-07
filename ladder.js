@@ -3,7 +3,7 @@
   if (typeof module === 'object' && module.exports) module.exports = factory();
   else root.LadderGame = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
-  const MIN_WINNERS = 2;
+  const MIN_WINNERS = 1;
   const MIN_PLAYERS = MIN_WINNERS + 1; // 당첨 최소 인원 + 통과 1명
   const MAX_PLAYERS = 10;
   const MIN_COMPLEXITY = 1;
